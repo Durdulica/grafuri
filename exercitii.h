@@ -1,6 +1,7 @@
 #ifndef EXERCITII_H
 #define EXERCITII_H
 #include <iostream>
+#include <ranges>
 using namespace std;
 
 constexpr int MAX_N = 100;
@@ -393,24 +394,117 @@ void ex11() {
 
 //sa se verifice daca un graf este partial folosind BFS
 
-bool eGrafPartial(int matrice[MAX_N][MAX_N], bool vizitat[], int n, int start) {
+bool eGrafBipartit(int matrice[MAX_N][MAX_N], int culoare[MAX_N], int n, int start) {
     int coada[100]{};
     int fata = 0, spate = 0;
     coada[spate++] = start;
-    vizitat[start] = true;
+    culoare[start] = 0;
 
     while(fata < spate) {
         int nod = coada[fata++];
         for(int i = 1; i <= n; i++) {
-            if(matrice[nod][i] && !vizitat[i]) {
-                vizitat[i] = true;
-                coada[spate++] = i;
+            if(matrice[nod][i]) {//exista muchie intre nod si i
+                if(culoare[i] == -1) {//nodul i nu are culoare
+                    culoare[i] =1-culoare[nod];//coloram cu culoarea opuse
+                    coada[spate++] = i;
+                }else if(culoare[i] == culoare[nod]) {
+                    return false;
+                }
             }
         }
     }
+    return true;
 }
 
 void ex12() {
+    int muchii[][2] = {{1,4},{1,3},{2, 3},{2,4},{3,5},{5,6},{6,3}};
+    int matrice[MAX_N][MAX_N], n = 4;
+    int culoare[MAX_N]{};
+    for(int i = 0; i <= n; i++) {
+        culoare[i] = -1;
+    }
 
+    for(auto & muchie : muchii) {
+        matrice[muchie[0]][muchie[1]] = matrice[muchie[1]][muchie[0]] = 1;
+    }
+
+    cout << eGrafBipartit(matrice, culoare, n, 1);
 }
+
+//sa se verif daca o matr. este sau nu matr. de adiacenta asociata unui graf neorientat
+
+bool verifMatrAdiacenta(int matr[MAX_N][MAX_N], int n) {
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= n; j++) {
+            if(matr[i][j] != matr[j][i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void ex13() {
+    int matrice[MAX_N][MAX_N] , n;
+    cin >> n;
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= n; j++) {
+            cin >> matrice[i][j];
+        }
+    }
+
+    cout << verifMatrAdiacenta(matrice, n);
+}
+
+//sa se det. nodurile din graf care au gradul egau cu gradul nodului k
+
+int ctNoduriGradK(int matr[MAX_N][MAX_N], int n, int k) {
+    int aux = gradNod(matr,n,k), ct = 0;
+    for(int i = 1; i <= n; i++) {
+        if(gradNod(matr,n,i) == aux) {
+            cout << i << " ";
+            ct++;
+        }
+    }
+    cout << endl;
+    return ct;
+}
+
+void ex14() {
+    int muchii[][2] = {{5,3},{1,4},{1,3},{4,5},{2,4},{1,2},{3,4}};
+    int matrice[MAX_N][MAX_N], n = 5, k = 3;
+    for(auto & muchie : muchii) {
+        matrice[muchie[0]][muchie[1]] = matrice[muchie[1]][muchie[0]] = 1;
+    }
+
+    cout << ctNoduriGradK(matrice, n, k);
+}
+
+//sa se afis. nodurile izolate ale grafului
+
+void afisNodIzolate(int matr[MAX_N][MAX_N], int n) {
+    int ct = 0;
+    for(int i = 1; i <= n; i++) {
+        if(gradNod(matr,n,i) == 0) {
+            ct++;
+            cout << i << " ";
+        }
+    }
+    cout << ct << endl;
+}
+
+void ex15() {
+    int muchii[][2] = {{1,4},{3,6},{4,3},{1,6},{6,4}};
+    int matrice[MAX_N][MAX_N], n = 6;
+    for(auto & muchie : muchii) {
+        matrice[muchie[0]][muchie[1]] = matrice[muchie[1]][muchie[0]] = 1;
+    }
+
+    afisNodIzolate(matrice,n);
+}
+
+//se da un graf orientat cu n noduri si m muchii. Se numeste nod saturat un vf. care are gradul mai mare sau egal cu jumatatea nr. de noduri
+//daca nr. de vf. este impar, atunci gradul tb. sa fie mai mare strict decat jumatatea nr. de noduri. Sa se afis. nodurile saturate din graf
+
+
 #endif //EXERCITII_H
